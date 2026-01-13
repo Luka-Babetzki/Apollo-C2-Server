@@ -1,1 +1,1 @@
-# Apollo-C2-Server
+# Apollo C2 Server
