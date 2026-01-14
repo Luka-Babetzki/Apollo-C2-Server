@@ -4,7 +4,23 @@ def session_handler():
     print(f'[+] Connecting to {host_ip}.')
     sock.connect((host_ip, host_port))
     print(f'[+] Connected to {host_ip}.')
-    sock.close()
+    while True:
+        try:
+            print('[+] Awaiting response...')
+            message = sock.recv(1024).decode()
+            if message == 'exit':
+                print('[-] The server has terminated the session.')
+                socket.close()
+                break
+            print(message)
+            response = input('Message to send#> ')
+            if response == 'exit':
+                sock.send(response.encode())
+                sock.close()
+                break
+        except Exception:
+            sock.close()
+            break
 
 sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 host_ip = '127.0.0.1'
