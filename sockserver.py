@@ -1,6 +1,17 @@
 import socket
 import sys
 
+def banner():
+    print('                       _ _        ')     
+    print('     /\               | | |       ')      
+    print('    /  \   _ __   ___ | | | ___   ')
+    print('   / /\ \ |  _ \ / _ \| | |/ _ \  ')
+    print('  / ____ \| |_) | (_) | | | (_) | ')
+    print(' /_/    \_\ .__/ \___/|_|_|\___/  ')
+    print('          | |                     ')
+    print('          |_|     By Luka Babetzki')             
+
+
 def comm_in(remote_target):
     print('[+] Awaiting response...')
     response = remote_target.recv(1024).decode()
@@ -20,7 +31,7 @@ def comm_handler(remote_target, remote_ip):
     print(f'[+] Connection received from: {remote_ip[0]}')
     while True:
         try:
-            message = input('Message to send#> ')
+            message = input('Message to send#>')
             if message == 'exit':
                 remote_target.send(message.encode())
                 remote_target.close()
@@ -40,9 +51,9 @@ def comm_handler(remote_target, remote_ip):
             remote_target.close()
             break
 
-if __name__ == "__main__":
+if __name__ == '__main__':
+    banner()
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     host_ip = sys.argv[1]
     host_port = int(sys.argv[2])
     listener_handler()
-
