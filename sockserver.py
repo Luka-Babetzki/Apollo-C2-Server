@@ -1,7 +1,6 @@
 import socket
 import sys
 
-
 def comm_in(remote_target):
     print('[+] Awaiting response...')
     response = remote_target.recv(1024).decode()
@@ -9,7 +8,6 @@ def comm_in(remote_target):
 
 def comm_out(remote_target, message):
     remote_target.send(message.encode())
-
 
 def listener_handler():
     sock.bind((host_ip, host_port))
