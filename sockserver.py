@@ -1,4 +1,5 @@
 import socket
+import sys
 
 def listener_handler():
     sock.bind((host_ip, host_port))
@@ -28,7 +29,7 @@ def listener_handler():
             break
 
 sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-host_ip = '127.0.0.1'
-host_port = 2222
+host_ip = sys.argv[1]
+host_port = int(sys.argv[2])
 listener_handler()
 
